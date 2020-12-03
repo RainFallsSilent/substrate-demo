@@ -164,6 +164,15 @@ decl_storage! {
             map hasher(blake2_128_concat) T::BlockNumber => Vec<(T::AccountId, T::AccountId)>;
 
         ProcessingErrands get(fn processing_errands): Vec<Cid>;
+
+        DevelopmentMode get(fn chain_type): bool;
+    }
+
+    add_extra_genesis {
+        config(development_mode): bool;
+        build(|config: &GenesisConfig| {
+            DevelopmentMode::put(config.development_mode);
+        })
     }
 }
 
@@ -415,6 +424,9 @@ impl<T: Trait> Module<T> {
     }
 
     fn apply_delegates(block_number: T::BlockNumber) {
+        let mode = DevelopmentMode::get();
+        debug::info!("devementMode: {:?} ", &mode);
+
         if !ClientsApplys::<T>::contains_key(&block_number) {
             debug::info!("height {:?} has no delegates, just return", &block_number);
             return;
